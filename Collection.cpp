@@ -1,5 +1,6 @@
 #include "Collection.h"
 #include "Compare.h"
+#include "Command.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -249,12 +250,42 @@ Array<Document> Collection::MainOperator(const string& input){
     bool isOr = clearInput.find("\"$or\"") != string::npos;
     cout << "DEBUG(ISAND/ISOR): " << isAnd << " " << isOr << endl;
 
+    // неявный and
+    if (!isAnd && !isOr) {
+        Document cond = parseJson(input);
+        auto items = cond.items();
+
+        Array< Array<Document> > all;
+
+        for (int i = 0; i < items.size; ++i) {
+            Array<Document> sub = findByField(items.data[i].key, items.data[i].value);
+            pushBack(all, sub);
+        }
+
+        if (all.size > 0) {
+            result = all.data[0];
+            for (int i = 1; i < all.size; ++i) {
+                Array<Document> temp;
+                for (int a = 0; a < result.size; ++a) {
+                    for (int b = 0; b < all.data[i].size; ++b) {
+                        if (result.data[a].items() == all.data[i].data[b].items()) {
+                            pushBack(temp, result.data[a]);
+                        }
+                    }
+                }
+                result = temp;
+            }
+        }
+
+        return result;
+    }
+
     if (isAnd || isOr) {
         int bracketStart = clearInput.find('[');
         int bracketEnd = clearInput.find(']');
         if (bracketStart != string::npos && bracketEnd != string::npos && bracketEnd > bracketStart) {
             string innerPart = clearInput.substr(bracketStart + 1, bracketEnd - bracketStart - 1);
-            // пишем внутреннию часть как условию
+            // пишем внутрениию часть как условию
             clearInput = "{" + innerPart + "}";
             cout << "DEBUG(Flattened AND/OR): " << clearInput << endl;
         }
