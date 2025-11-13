@@ -1,0 +1,6 @@
+{
+ "doc_1": { "city" : "Paris", "name" : "Bob", "age" : "30" },
+ "doc_2": { "city" : "London", "name" : "Alice", "age" : "25" },
+ "doc_3": { "city" : "Madrid", "name" : "Carlos", "age" : "40" },
+ "doc_4": { "city" : "Paris", "name" : "Emma", "age" : "22" }
+}
