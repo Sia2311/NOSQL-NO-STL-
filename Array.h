@@ -250,7 +250,6 @@ bool operator==(const Array<T>& a, const Array<T>& b) {
     return true;
 }
 
-// глубокая копия массива 
 template<typename T>
 Array<T> copyArray(const Array<T>& src) {
     Array<T> dst = createArray<T>();

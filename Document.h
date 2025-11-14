@@ -1,24 +1,26 @@
 #pragma once
 #include <string>
-#include <optional>
+#include "Optoinal.h"
 #include <iostream>
 #include "HashMap.h"
 #include "Array.h"
 
+using namespace std;
+
 class Document {
 private:
     // хранит все поля документа
-    HashMap<std::string, std::string> fields;
+    HashMap<string, string> fields;
 
 public:
 
-    void set(const std::string& key, const std::string& value);
+    void set(const string& key, const string& value);
 
-    std::optional<std::string> get(const std::string& key) const;
+    Optional<string> get(const string& key) const;
 
-    bool contains(const std::string& key) const;
+    bool contains(const string& key) const;
 
     void print() const;
 
-    Array<HashMap<std::string,std::string>::Pair> items() const;  
+    Array<HashMap<string,string>::Pair> items() const;  
 };

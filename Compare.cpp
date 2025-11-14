@@ -8,7 +8,6 @@ bool ComparsionOperator (const string& fieldValue, const string& condition){
     if(condition.empty()) {
         return false;
     }
-    cout << "[DEBUG] fieldValue=" << fieldValue << " condition=" << condition << endl;
 
     // если используется несколько операторов
     if (
@@ -66,7 +65,7 @@ bool ComparsionOperator (const string& fieldValue, const string& condition){
 
     //если строка не начинается с { то будет типо ("London")
     if(condition.front() != '{'){
-        // если оба значения можно преобразовать в число — сравниваем как числа
+        // если оба значения можно преобразовать в число сравниваем как числа
         double fVal = 0, cVal = 0;
         bool isNum = true;
         try {
@@ -76,9 +75,8 @@ bool ComparsionOperator (const string& fieldValue, const string& condition){
             isNum = false;
         }
         if (isNum) {
-            return fVal == cVal; // равенство как чисел
+            return fVal == cVal; 
         }
-        // иначе сравниваем как строки
         return fieldValue == condition;
     }
 

@@ -1,0 +1,49 @@
+INSERT
+./no_sql_dbms testdb insert '{"name":"Alice","age":"25","city":"Paris"}'
+./no_sql_dbms testdb insert '{"name":"Bob","age":"30","city":"London"}'
+./no_sql_dbms testdb insert '{"name":"Chris","age":"19","city":"Paris"}'
+./no_sql_dbms testdb insert '{"name":"David","age":"35","city":"Madrid"}'
+./no_sql_dbms testdb insert '{"name":"Eva","age":"22","city":"London","salary":"2500"}'
+
+PRINT
+./no_sql_dbms testdb print
+
+FIND_EQUALITY
+./no_sql_dbms testdb find '{"city":"Paris"}'
+./no_sql_dbms testdb find '{"age":"30"}'
+
+FIND_MULTIPLE
+./no_sql_dbms testdb find '{"city":"Paris","age":"25"}'
+
+FIND_GT_LT
+./no_sql_dbms testdb find '{"age":{"$gt":"25"}}'
+./no_sql_dbms testdb find '{"age":{"$gte":"30"}}'
+./no_sql_dbms testdb find '{"age":{"$lt":"25"}}'
+./no_sql_dbms testdb find '{"age":{"$lte":"22"}}'
+
+FIND_RANGE
+./no_sql_dbms testdb find '{"age":{"$gt":"20","$lt":"30"}}'
+./no_sql_dbms testdb find '{"age":{"$gte":"20","$lte":"30"}}'
+
+FIND_LIKE
+./no_sql_dbms testdb find '{"city":{"$like":"%ar%"}}'
+./no_sql_dbms testdb find '{"city":{"$like":"L%"}}'
+./no_sql_dbms testdb find '{"city":{"$like":"%s"}}'
+./no_sql_dbms testdb find '{"name":{"$like":"_h%"}}'
+
+FIND_IN
+./no_sql_dbms testdb find '{"city":{"$in":["Paris","London"]}}'
+./no_sql_dbms testdb find '{"age":{"$in":["19","22","28"]}}'
+
+FIND_AND
+./no_sql_dbms testdb find '{"$and":[{"city":"Paris"},{"age":{"$gt":"20"}}]}'
+
+FIND_OR
+./no_sql_dbms testdb find '{"$or":[{"city":"Paris"},{"city":"London"}]}'
+
+DELETE
+./no_sql_dbms testdb delete '{"city":"Paris"}'
+./no_sql_dbms testdb delete '{"age":"30"}'
+
+FINAL_PRINT
+./no_sql_dbms testdb print

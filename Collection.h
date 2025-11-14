@@ -7,28 +7,27 @@
 class Collection {
 private:
     HashMap<string, Document> documents;  // хранение документов
-    int idCounter = 0; // для генерации уникальных _id
+    int idCounter = 0; 
 
-    // генерация нового _id
     string generateId();
+    string filename;
 
 public:
-    // вставка документа, возвращает сгенерированный id
+
     string insert(const Document& doc);
 
-    // поиск всех документов, где key=value
     Array<Document> findByField(const string&key, const string& value) const;
 
-    // удаление всех документов, где key=value
     void removeByField(const string& key, const string& value);
 
-    // вывод всей коллекции
     void print() const;
 
-    void SaveToFile(const string& filename) const; 
+    void SaveToFile() const; 
 
-    void LoadFromFIle(const string& filename);
+    void LoadFromFIle();
 
     Array<Document> MainOperator(const string& input);
+
+    void setFilename(const string& name);
 
 };

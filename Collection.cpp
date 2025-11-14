@@ -1,6 +1,7 @@
 #include "Collection.h"
 #include "Compare.h"
-#include "Command.h"
+#include "Parser.h"
+#include "Optoinal.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -18,6 +19,10 @@ string Collection::insert(const Document& doc){
     return id;
 }
 
+void Collection::setFilename(const string& name) {
+    filename = name;
+}
+
 //поиск документов с нужным полем и значением
 Array<Document> Collection::findByField(const string& key, const string& value) const {
     
@@ -33,7 +38,9 @@ Array<Document> Collection::findByField(const string& key, const string& value) 
 
         // ищем поле
         auto field = doc.get(key);
-        if (!field.has_value()) continue;
+        if (!field.HAS_value()){
+            continue;
+        }
 
         string fieldVal = field.value();
         string cond = value;
@@ -70,7 +77,9 @@ void Collection::removeByField(const string& key, const string& value) {
         const Document& doc = all.data[i].value;
 
         auto field = doc.get(key);
-        if (!field.has_value()) continue;
+        if (!field.HAS_value()){
+            continue;
+        }
 
         string fieldVal = field.value();
         string cond = value;
@@ -80,7 +89,7 @@ void Collection::removeByField(const string& key, const string& value) {
             cond = cond.substr(1, cond.size() - 2);
         }
 
-        // используем общий оператор сравнения 
+        // используем  оператор сравнения 
         if (ComparsionOperator(fieldVal, cond)) {
 
             if (toDelete.size >= toDelete.capacity)
@@ -96,7 +105,7 @@ void Collection::removeByField(const string& key, const string& value) {
     }
 
     // сохраняем изменения в файл
-    SaveToFile("my_database.json");
+    SaveToFile();
     cout << "Documents deleted successfully." << endl;
 }
 
@@ -115,7 +124,7 @@ void Collection::print() const {
 
 
 // "doc_1": { "name" : "Alice", "age" : "25" }
-void Collection::SaveToFile(const string& filename) const {
+void Collection::SaveToFile() const {
     ofstream file(filename);
     if(!file.is_open()){
         cerr << "Ошибка откратия файла для записи" << endl;
@@ -154,7 +163,7 @@ void Collection::SaveToFile(const string& filename) const {
     cout << "Коллекция сохранена в файл " << filename << endl;
 }
 
-void Collection::LoadFromFIle(const string& filename){
+void Collection::LoadFromFIle(){
     ifstream file(filename);
     if(!file.is_open()){
         cerr << "Файл не найден" << endl;
@@ -235,8 +244,6 @@ Array<Document> Collection::MainOperator(const string& input){
 
     Array<Document> result;
 
-    cout << "DEBUG(INPUT): " << input << endl;
-
     //удаляем пробелы
     string clearInput;
     for(char ch : input){
@@ -244,11 +251,9 @@ Array<Document> Collection::MainOperator(const string& input){
             clearInput += ch;
         }
     }
-    cout << "DEBUG(CLEARINPUT): " << clearInput << endl;
     //определим тип
     bool isAnd = clearInput.find("\"$and\"") != string::npos;
     bool isOr = clearInput.find("\"$or\"") != string::npos;
-    cout << "DEBUG(ISAND/ISOR): " << isAnd << " " << isOr << endl;
 
     // неявный and
     if (!isAnd && !isOr) {
@@ -256,7 +261,7 @@ Array<Document> Collection::MainOperator(const string& input){
         auto items = cond.items();
 
         Array< Array<Document> > all;
-
+        //ищем совпадения
         for (int i = 0; i < items.size; ++i) {
             Array<Document> sub = findByField(items.data[i].key, items.data[i].value);
             pushBack(all, sub);
@@ -266,8 +271,9 @@ Array<Document> Collection::MainOperator(const string& input){
             result = all.data[0];
             for (int i = 1; i < all.size; ++i) {
                 Array<Document> temp;
-                for (int a = 0; a < result.size; ++a) {
-                    for (int b = 0; b < all.data[i].size; ++b) {
+                //ищем перечечения
+                for (int a = 0; a < result.size; ++a) { //прошлый набор
+                    for (int b = 0; b < all.data[i].size; ++b) { //новый набор
                         if (result.data[a].items() == all.data[i].data[b].items()) {
                             pushBack(temp, result.data[a]);
                         }
@@ -279,7 +285,7 @@ Array<Document> Collection::MainOperator(const string& input){
 
         return result;
     }
-
+    //есть оператор
     if (isAnd || isOr) {
         int bracketStart = clearInput.find('[');
         int bracketEnd = clearInput.find(']');
@@ -287,7 +293,6 @@ Array<Document> Collection::MainOperator(const string& input){
             string innerPart = clearInput.substr(bracketStart + 1, bracketEnd - bracketStart - 1);
             // пишем внутрениию часть как условию
             clearInput = "{" + innerPart + "}";
-            cout << "DEBUG(Flattened AND/OR): " << clearInput << endl;
         }
     }
 
@@ -297,15 +302,14 @@ Array<Document> Collection::MainOperator(const string& input){
     }
     //вытаскиваем условим из скобок
     int start = clearInput.find("{"); // УЖАСНОЕ МЕСТО (ЛУЧШЕ НЕ ТРОГАТЬ)
-    cout << "DEBUG(START): " << start << endl;
     if(start == string::npos){
         return result;
     }
     string inner = clearInput.substr(start);
-    cout << "DEBUG(INNER): " << inner << endl;
     //разбиваем услвоия
     Array<string> conditions; // сюда ложатся условия
     int position = 0;
+    //нарезаем строку на куски
     while(true){
         int open = clearInput.find("{", position);
         int close = clearInput.find ("}", open);
@@ -331,14 +335,12 @@ Array<Document> Collection::MainOperator(const string& input){
         }
         //вырезаем ключ и ищем двоеточие
         string key = cond.substr(keyStart, keyEnd - keyStart);
-        cout << "DEBUG: " << key << endl;
         int colon = cond.find(":", keyEnd);
 
         if(colon == string::npos){
             continue;
         }
         string value = cond.substr(colon + 1); //всё после ":" - условие
-        cout << "DEBUG: " << value << endl;
         // убираем лишние символы только если значение не объект {...}
         if (value.find('{') == string::npos) {
             while(!value.empty() && (value.back() == '}' || value.back() == ',' || value.back() == ' ')) {
@@ -349,7 +351,6 @@ Array<Document> Collection::MainOperator(const string& input){
         while(!value.empty() && (value.front() == ' ' || value.front() == '\t')) {
             value.erase(0, 1);
         }
-        cout << "DEBUG" << " VALUE: " << value << endl;
 
         Array<Document> subRes = findByField(key, value);
         pushBack(allResults, subRes);
@@ -376,9 +377,9 @@ Array<Document> Collection::MainOperator(const string& input){
     }
     //$or
     else if(isOr){
-        for (int i = 0; i < allResults.size; ++i) { // каждое условие
+        for (int i = 0; i < allResults.size; ++i) { // каждый результат условий
             for (int j = 0; j < allResults.data[i].size; ++j) { // каждый документ
-                bool exists = false;
+                bool exists = false; 
                 for (int k = 0; k < result.size; ++k) { // не добавлен ли уже документ
                     if (result.data[k].items() == allResults.data[i].data[j].items()) {
                         exists = true;

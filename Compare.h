@@ -1,3 +1,6 @@
 #pragma once
 #include <string>
-bool ComparsionOperator(const std::string& fieldValue, const std::string& condition);
+
+using namespace std;
+
+bool ComparsionOperator(const string& fieldValue, const string& condition);

@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <optional>
+#include "Optoinal.h"
 #include "Array.h"
 #include "SinglyList.h"
 
@@ -59,6 +59,7 @@ private:
         for (int i = 0; i < oldCapacity; ++i) {
             ForwardList<Pair>& chain = oldTable.data[i];
             SNode<Pair>* current = chain.head;
+
             while (current != nullptr) {
                 put(current->data.key, current->data.value);
                 current = current->next;
@@ -88,8 +89,8 @@ public:
 
         int index = hash(key);
         ForwardList<Pair>& chain = table.data[index];
-        //существует ли уже такой ключ
         SNode<Pair>* current = chain.head;
+        
         while (current != nullptr) {
             if (current->data.key == key) {
                 current->data.value = value;
@@ -139,7 +140,7 @@ public:
     
 
     //значение по ключу
-    optional<V> get(const K& key) const {
+    Optional<V> get(const K& key) const {
         int index = hash(key);
         const ForwardList<Pair>& chain = table.data[index];
 
@@ -150,7 +151,7 @@ public:
             }
             current = current->next;
         }
-        return nullopt; 
+        return Optional<V>(); 
     }
     //вернуть массив всех пар
     Array<Pair> items() const {
